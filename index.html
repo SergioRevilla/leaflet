@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Visor elaborador a partir de leaflet</title>
+<!-- Codificación -->
+<meta charset="utf-8" />
+
+<!-- Aqui aparecen los enlaces para conseguir la relación a archivos  CSS de Leaflet en la cabecera -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.0/dist/leaflet.css"
+ integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+ crossorigin=""/>
+<!-- Aqui aparecen los enlaces para conseguir la relación a JavaScript de Leaflet justo tras CSS -->
+<script src="https://unpkg.com/leaflet@1.5.0/dist/leaflet.js"
+ integrity="sha512-3Wcxp7F9bV2pl+MBgrL6Pz7AJASLpemmQPIiPA0lDs3ImF0z4JuuMIBPeirLbgIuhfH2gJyGWZjvm6M+Zr7L6Q=="
+ crossorigin=""></script>
+
+</head>
+<body>
+
+<h1><span style="font-family: sans-serif;">Visor cartográfico</span></h1>
+
+<!-- bloque y parámetros del mapa -->
+<div id="bloque_mapa" style="width: 600px; height: 400px;"></div>
+
+<!-- script el mapa como una varible y establecer los parámetros donde ira el mapa -->
+<script>
+
+	var mi_mapa = L.map('bloque_mapa').setView([40, -2], 5);
+
+//añadir variable mapa de fondo (TMS); finalmente se añade al mapa
+
+  var stamen_tms = L.tileLayer('http://a.tile.stamen.com/terrain/{z}/{x}/{y}.png', {
+        attribution: '2019 práctica Sergio Revilla <a href="http://stamen.com">Stamen Design</a>,<a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash;Map data: &copy; <a href="http://openstreetmap.org">OpenStreetMap</a>contributors,<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+        maxZoom: 20
+
+      }).addTo(mi_mapa);
+//se puede añadir marcadores en este ejemplo se marcara Madrid (Capital de España), como se ve el marcador se crea como una variable
+        var marker= L.marker([40.41, -3.7]).addTo(mi_mapa);
+//se añade otro  TMS al mapa sencillo esta información esta disponible https://leaflet-extras.github.io/leaflet-providers/preview/
+var CartoDB_DarkMatter = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	subdomains: 'abcd',
+	maxZoom: 19
+});
+  CartoDB_DarkMatter.addTo(mi_mapa);
+
+// -Aqui se añaden varios WMS se ha introducido por las crecidas del IDEE nacional
+  var PNOA = L.tileLayer.wms('http://www.idee.es/wms/PNOA/PNOA?', {  //URL WMS
+      layers: 'PNOA',          // capa del WMS
+      format: 'image/png',     // tipo de formato
+      transparent: true,       // activa capa alfa/transparente
+      });
+  PNOA.addTo(mi_mapa);         // añadir capa al mapa
+
+  var INU = L.tileLayer.wms('http://servicios.idee.es/wms-inspire/riesgos-naturales/inundaciones?', {  //URL WMS
+      layers: 'Fluvial T = 10 años', // capa del WMS
+      format: 'image/jpeg',     // tipo de formato
+      transparent: true,       // activa capa alfa/transparente
+      });
+  INU.addTo(mi_mapa);         // añadir capa al mapa
+
+
+// se establece el control de la capa base y de los overlaymaps
+
+var baseMaps = {                  // asi se denomina la variable base
+    "OpenStreetMap": CartoDB_DarkMatter,  // mapa base descargable anteriormente
+    "Stamen": stamen_tms,
+    };
+var overlayMaps = {
+    "Ortotfoto PNOA": PNOA,
+    "Fluvial T = 10 años": INU,       //nombre de la capa de inundaciones y la ortofoto
+    };
+
+
+var capas = L.control.layers(   // variable con control de capas
+  baseMaps,                     // añadiendo capas base y capas auxiliares
+  overlayMaps,
+
+  {collapsed:true});            // control para desplegar desplegado
+capas.addTo(mi_mapa);           // añade las capas al mapa
+
+// introducir una escala al visor
+
+var escala = L.control.scale({position:"topright"})  // variable escala cambiar la ubicación
+escala.addTo(mi_mapa);          // añade escala al mapa
+
+
+
+</script>
+
+</body>
+</html>
